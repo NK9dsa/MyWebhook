@@ -6,14 +6,13 @@ local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 local placeId = game.PlaceId
 
--- ✅ ลิงก์ Webhook ใหม่
 local url = "https://discord.com/api/webhooks/1373155239783436378/qM-BFbp2xb57nqXqFcrd3SAZRLxQtkAjMyfi9W6qquIwJzSQjEdqYxmGTeUTyq36omd4"
 
-local function createItemEmbed(playerName, gemValue, goldValue, levelValue, eggValue, itemValue, merchantValue)
+local function createItemEmbed(playerName, gemValue, goldValue, levelValue, rccellValue, itemValue, merchantValue)
     local description = string.format(
         "**⭐ ชื่อในเกม:** ||%s||\n\n" ..
         "💎 Gem %d   🪙 Gold %d\n" ..
-        "🎚 Level %d   🥚 Egg %d\n\n" ..
+        "🎚 Level %d   🧪 RC Cells %d\n\n" ..
         "🛍️ **Items**\n" ..
         "👉🏻 **Cursed Finger:** %d ชิ้น\n" ..
         "🧑🏻‍⚕️ **Dr. Megga Punk:** %d ชิ้น\n" ..
@@ -28,7 +27,7 @@ local function createItemEmbed(playerName, gemValue, goldValue, levelValue, eggV
         "💰 **Trait Reroll:** %d Gem (x%d)\n",
         playerName or "Unknown",
         gemValue or 0, goldValue or 0,
-        levelValue or 0, eggValue or 0,
+        levelValue or 0, rccellValue or 0,
         itemValue.CursedFinger or 0,
         itemValue.DrMeggaPunk or 0,
         itemValue.RangerCrystal or 0,
@@ -41,7 +40,7 @@ local function createItemEmbed(playerName, gemValue, goldValue, levelValue, eggV
         merchantValue.TraitReroll.Amount or 0, merchantValue.TraitReroll.Quantity or 0
     )
 
-    return { {
+    return {{
         title = "🧛🏻Anime Rangers X [UPDATE 1]",
         description = description,
         color = 13369344,
@@ -56,14 +55,13 @@ local function createItemEmbed(playerName, gemValue, goldValue, levelValue, eggV
         image = {
             url = "https://tr.rbxcdn.com/180DAY-0b31ac08cbd92f3d49bb8814f0834315/768/432/Image/Png/noFilter"
         }
-    } }
+    }}
 end
 
-
-local function sendToDiscord(playerName, gemValue, goldValue, levelValue, eggValue, itemValue, merchantValue)
+local function sendToDiscord(playerName, gemValue, goldValue, levelValue, rccellValue, itemValue, merchantValue)
     local payload = {
         content = nil,
-        embeds = createItemEmbed(playerName, gemValue, goldValue, levelValue, eggValue, itemValue, merchantValue),
+        embeds = createItemEmbed(playerName, gemValue, goldValue, levelValue, rccellValue, itemValue, merchantValue),
         username = "Kantinan Hub",
         avatar_url = "https://img2.pic.in.th/pic/475981006_504564545992490_6167097446539934981_n.md.jpg"
     }
@@ -153,12 +151,14 @@ local function checkItemsForPlayer(playerName)
     local gemValue = playerData:FindFirstChild("Gem") and playerData.Gem.Value or 0
     local goldValue = playerData:FindFirstChild("Gold") and playerData.Gold.Value or 0
     local levelValue = playerData:FindFirstChild("Level") and playerData.Level.Value or 0
-    local eggValue = playerData:FindFirstChild("Egg") and playerData.Egg.Value or 0
+
+    -- ✅ เปลี่ยนจาก Egg เป็น RCCells
+    local rccellValue = playerData:FindFirstChild("RCCells") and playerData.RCCells.Value or 0
 
     local merchantInfo = getMerchantData(playerDataFolder)
 
     print("📤 กำลังส่งข้อมูลไป Discord สำหรับผู้เล่น: " .. playerName)
-    sendToDiscord(playerName, gemValue, goldValue, levelValue, eggValue, itemInfo, merchantInfo)
+    sendToDiscord(playerName, gemValue, goldValue, levelValue, rccellValue, itemInfo, merchantInfo)
 end
 
 task.spawn(function()
