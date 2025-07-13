@@ -1,43 +1,51 @@
 getgenv().key = {23165,60422,19160,81028,55939,42326} 
 loadstring(game:HttpGet('https://raw.githubusercontent.com/Xenon-Trash/Loader/main/Loader.lua'))()
 
-local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
-local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
-
+local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local placeId = game.PlaceId
 
--- ฟังก์ชันสำหรับ rejoin
-local function rejoin()
-    print("Attempting to rejoin...")
-    TeleportService:Teleport(placeId, player)
+-- GUI popup ง่าย ๆ
+local function createRejoinGui()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "RejoinGui"
+    screenGui.ResetOnSpawn = false
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.3, 0, 0.1, 0)
+    label.Position = UDim2.new(0.35, 0, 0.45, 0)
+    label.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Text = "กำลังเชื่อมต่อใหม่..."
+    label.TextScaled = true
+    label.Parent = screenGui
+
+    screenGui.Parent = game:GetService("CoreGui")
 end
 
--- ตรวจสอบเมื่อแสดง Error Message (บางครั้งเน็ตหลุด)
+-- ฟังก์ชัน rejoin พร้อม retry
+local function rejoin()
+    createRejoinGui()
+    print("Attempting to rejoin...")
+    local success, err = pcall(function()
+        TeleportService:Teleport(placeId)
+    end)
+    if not success then
+        warn("Teleport failed: " .. tostring(err))
+        wait(5)
+        rejoin()
+    end
+end
+
+-- ตรวจจับเมื่อเกิด error popup (เน็ตหลุด / โดนเตะ)
 GuiService.ErrorMessageChanged:Connect(function(msg)
-    print("Error Message Changed: ", msg)
+    print("Error Message: ", msg)
     if msg and msg ~= "" then
         wait(2)
         rejoin()
     end
 end)
 
--- ตรวจสอบเมื่อ Player ถูกเตะออก
-player.OnTeleport:Connect(function(state)
-    if state == Enum.TeleportState.Failed then
-        print("Teleport Failed, trying to rejoin...")
-        wait(2)
-        rejoin()
-    end
-end)
-
--- ในกรณีที่เน็ตช้าหรือ connection lost
-RunService.RenderStepped:Connect(function()
-    if not player:IsDescendantOf(Players) then
-        wait(2)
-        rejoin()
-    end
-end)
-
+print("ทำงานนนนนนน")
